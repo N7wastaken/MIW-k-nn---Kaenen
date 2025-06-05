@@ -1,0 +1,15 @@
+c:\Users\arkadiusz.mulkityn\Kaenen\bin\Debug\net9.0-windows\Kaenen.exe
+c:\Users\arkadiusz.mulkityn\Kaenen\bin\Debug\net9.0-windows\Kaenen.deps.json
+c:\Users\arkadiusz.mulkityn\Kaenen\bin\Debug\net9.0-windows\Kaenen.runtimeconfig.json
+c:\Users\arkadiusz.mulkityn\Kaenen\bin\Debug\net9.0-windows\Kaenen.dll
+c:\Users\arkadiusz.mulkityn\Kaenen\bin\Debug\net9.0-windows\Kaenen.pdb
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\Kaenen.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\Kaenen.AssemblyInfoInputs.cache
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\Kaenen.AssemblyInfo.cs
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\Kaenen.csproj.CoreCompileInputs.cache
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\Kaenen.sourcelink.json
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\Kaenen.dll
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\refint\Kaenen.dll
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\Kaenen.pdb
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\Kaenen.genruntimeconfig.cache
+c:\Users\arkadiusz.mulkityn\Kaenen\obj\Debug\net9.0-windows\ref\Kaenen.dll

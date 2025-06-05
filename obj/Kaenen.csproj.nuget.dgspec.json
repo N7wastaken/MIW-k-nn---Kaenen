@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\arkadiusz.mulkityn\\Kaenen\\Kaenen.csproj": {}
+    "c:\\Users\\arkadiusz.mulkityn\\Kaenen\\Kaenen.csproj": {}
   },
   "projects": {
-    "C:\\Users\\arkadiusz.mulkityn\\Kaenen\\Kaenen.csproj": {
+    "c:\\Users\\arkadiusz.mulkityn\\Kaenen\\Kaenen.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\arkadiusz.mulkityn\\Kaenen\\Kaenen.csproj",
+        "projectUniqueName": "c:\\Users\\arkadiusz.mulkityn\\Kaenen\\Kaenen.csproj",
         "projectName": "Kaenen",
-        "projectPath": "C:\\Users\\arkadiusz.mulkityn\\Kaenen\\Kaenen.csproj",
+        "projectPath": "c:\\Users\\arkadiusz.mulkityn\\Kaenen\\Kaenen.csproj",
         "packagesPath": "C:\\Users\\arkadiusz.mulkityn\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\arkadiusz.mulkityn\\Kaenen\\obj\\",
+        "outputPath": "c:\\Users\\arkadiusz.mulkityn\\Kaenen\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\arkadiusz.mulkityn\\AppData\\Roaming\\NuGet\\NuGet.Config"
