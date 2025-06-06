@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Kaenen")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+83edcc635153a0ca2183d0f03967b38e0080ae8f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+94d64f407be8c3172d7ec7911f0b0a3775217bad")]
 [assembly: System.Reflection.AssemblyProductAttribute("Kaenen")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Kaenen")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

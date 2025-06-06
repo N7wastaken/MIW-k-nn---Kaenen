@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Kaenen
 {
@@ -10,8 +12,9 @@ namespace Kaenen
     {
         private delegate double MetrykaDelegate(double[] a, double[] b);
         private double[][] dane;
-        private string[] etyk;
+        private string[] etykiety;
         private int k = 3;
+        private bool daneZnormalizowane = false;
 
         public Form1()
         {
@@ -19,6 +22,7 @@ namespace Kaenen
             this.Load += Form1_Load;
             btnWczytaj.Click += BtnWczytaj_Click;
             btnOblicz.Click += BtnOblicz_Click;
+            btnNormalizuj.Click += BtnNormalizuj_Click;
             nudK.ValueChanged += NudK_ValueChanged;
         }
 
@@ -45,6 +49,8 @@ namespace Kaenen
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
                     WczytajDane(dlg.FileName);
+                    daneZnormalizowane = false;
+                    btnNormalizuj.Enabled = true;
                 }
             }
         }
@@ -55,12 +61,12 @@ namespace Kaenen
             {
                 string[] linie = File.ReadAllLines(sciezka);
                 dane = new double[linie.Length][];
-                etyk = new string[linie.Length];
+                etykiety = new string[linie.Length];
 
                 for (int i = 0; i < linie.Length; i++)
                 {
-                    string[] czesci = linie[i].Split(' ');
-                    etyk[i] = czesci[czesci.Length - 1];
+                    string[] czesci = linie[i].Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    etykiety[i] = czesci[czesci.Length - 1];
                     dane[i] = new double[czesci.Length - 1];
 
                     for (int j = 0; j < czesci.Length - 1; j++)
@@ -79,6 +85,39 @@ namespace Kaenen
             }
         }
 
+        private void BtnNormalizuj_Click(object sender, EventArgs e)
+        {
+            if (dane == null || dane.Length == 0)
+            {
+                MessageBox.Show("Najpierw wczytaj dane!", "Błąd");
+                return;
+            }
+
+            NormalizujDane();
+            daneZnormalizowane = true;
+            btnNormalizuj.Enabled = false;
+            lblStatus.Text = $"Dane znormalizowane. {dane.Length} rekordów, {dane[0].Length} cech";
+        }
+
+        private void NormalizujDane()
+        {
+            int liczbaCech = dane[0].Length;
+            
+            for (int i = 0; i < liczbaCech; i++)
+            {
+                double min = dane.Min(x => x[i]);
+                double max = dane.Max(x => x[i]);
+                double roznica = max - min;
+
+                if (roznica == 0) continue;
+
+                for (int j = 0; j < dane.Length; j++)
+                {
+                    dane[j][i] = (dane[j][i] - min) / roznica;
+                }
+            }
+        }
+
         private void NudK_ValueChanged(object sender, EventArgs e)
         {
             k = (int)nudK.Value;
@@ -92,61 +131,75 @@ namespace Kaenen
                 return;
             }
 
-            MethodInfo wybMetoda = cmbMetryki.SelectedItem as MethodInfo;
-            if (wybMetoda == null) return;
-
-            string wynik = $"═══ WYNIKI OBLICZEŃ - {wybMetoda.Name.Replace("Metryka", "")} (k={k}) ═══\n\n";
-
-            var klasy = new[] { "1", "2", "3" };
-            foreach (string klasa in klasy)
+            if (!daneZnormalizowane && MessageBox.Show("Dane nie zostały znormalizowane. Czy chcesz kontynuować?", 
+                                                   "Ostrzeżenie", 
+                                                   MessageBoxButtons.YesNo) == DialogResult.No)
             {
-                wynik += $"▬▬▬ KLASA {klasa} ▬▬▬\n";
-                var objKlasy = dane.Select((d, i) => new { dane = d, idx = i, etyk = etyk[i] })
-                                  .Where(x => x.etyk == klasa)
-                                  .Take(k)
-                                  .ToArray();
-
-                for (int i = 0; i < objKlasy.Length - 1; i++)
-                {
-                    for (int j = i + 1; j < objKlasy.Length; j++)
-                    {
-                        double odl = (double)wybMetoda.Invoke(this, new object[] { objKlasy[i].dane, objKlasy[j].dane });
-                        wynik += $"  Obj[{objKlasy[i].idx + 1:D3}] ↔ Obj[{objKlasy[j].idx + 1:D3}]: {odl:F4}\n";
-                    }
-                }
-                wynik += "\n";
+                return;
             }
 
-            wynik += $"▬▬▬ MIĘDZYKLASOWE (pierwsze {k * 2}) ▬▬▬\n";
-            var obj1 = dane.Select((d, i) => new { dane = d, idx = i, etyk = etyk[i] })
-                          .Where(x => x.etyk == "1").Take(k).ToArray();
-            var obj2 = dane.Select((d, i) => new { dane = d, idx = i, etyk = etyk[i] })
-                          .Where(x => x.etyk == "2").Take(k).ToArray();
-            var obj3 = dane.Select((d, i) => new { dane = d, idx = i, etyk = etyk[i] })
-                          .Where(x => x.etyk == "3").Take(k).ToArray();
+            MethodInfo wybranaMetoda = cmbMetryki.SelectedItem as MethodInfo;
+            if (wybranaMetoda == null) return;
 
-            int licz = 0;
-            foreach (var o1 in obj1)
+            int poprawneKlasyfikacje = 0;
+            var sb = new StringBuilder();
+
+            sb.AppendLine("=== WALIDACJA 1 vs RESZTA ===");
+            sb.AppendLine($"Metryka: {wybranaMetoda.Name.Replace("Metryka", "")}");
+            sb.AppendLine($"Wartość k: {k}");
+            sb.AppendLine($"Liczba próbek: {dane.Length}");
+            sb.AppendLine();
+
+            for (int i = 0; i < dane.Length; i++)
             {
-                foreach (var o2 in obj2)
-                {
-                    if (licz++ >= k * 2) break;
-                    double odl = (double)wybMetoda.Invoke(this, new object[] { o1.dane, o2.dane });
-                    wynik += $"  Kl1[{o1.idx + 1:D3}] ↔ Kl2[{o2.idx + 1:D3}]: {odl:F4}\n";
-                }
-                if (licz >= k * 2) break;
+                string przewidzianaKlasa = KlasyfikujKNn(dane[i], wybranaMetoda, i);
+                bool poprawna = przewidzianaKlasa == etykiety[i];
+                
+                if (poprawna) poprawneKlasyfikacje++;
+                
+                sb.AppendLine($"Próbka {i+1,3}: {(poprawna ? "OK" : "NG")} | " +                  // NG - Not Good  
+                              $"Rzeczywista: {etykiety[i],-9} Przewidziana: {przewidzianaKlasa}");
             }
 
-            txtWyniki.Text = wynik;
+            double dokladnosc = (double)poprawneKlasyfikacje / dane.Length * 100;
+            sb.AppendLine();
+            sb.AppendLine("=== PODSUMOWANIE ===");
+            sb.AppendLine($"Poprawne klasyfikacje: {poprawneKlasyfikacje}/{dane.Length}");
+            sb.AppendLine($"Dokładność: {dokladnosc:F2}%");
+
+            txtWyniki.Text = sb.ToString();
         }
 
+        private string KlasyfikujKNn(double[] probkaTestowa, MethodInfo metoda, int indeksPomin)
+        {
+            var odleglosci = new List<Tuple<double, string>>();
+
+            for (int i = 0; i < dane.Length; i++)
+            {
+                if (i == indeksPomin) continue;
+
+                double odleglosc = (double)metoda.Invoke(this, new object[] { probkaTestowa, dane[i] });
+                odleglosci.Add(new Tuple<double, string>(odleglosc, etykiety[i]));
+            }
+
+            var kNajblizszych = odleglosci
+                .OrderBy(x => x.Item1)
+                .Take(k)
+                .GroupBy(x => x.Item2)
+                .OrderByDescending(g => g.Count())
+                .ToList();
+
+            return kNajblizszych.Count == 1 || kNajblizszych[0].Count() > kNajblizszych[1].Count() 
+                   ? kNajblizszych[0].Key 
+                   : "REMIS";
+        }
+
+        // Metryki
         private double MetrykaEuklidesowa(double[] a, double[] b)
         {
             double suma = 0.0;
             for (int i = 0; i < Math.Min(a.Length, b.Length); i++)
-            {
                 suma += Math.Pow(a[i] - b[i], 2.0);
-            }
             return Math.Sqrt(suma);
         }
 
@@ -154,9 +207,7 @@ namespace Kaenen
         {
             double suma = 0.0;
             for (int i = 0; i < Math.Min(a.Length, b.Length); i++)
-            {
                 suma += Math.Abs(a[i] - b[i]);
-            }
             return suma;
         }
 
@@ -165,9 +216,7 @@ namespace Kaenen
             double suma = 0.0;
             double p = k;
             for (int i = 0; i < Math.Min(a.Length, b.Length); i++)
-            {
                 suma += Math.Pow(Math.Abs(a[i] - b[i]), p);
-            }
             return Math.Pow(suma, 1.0 / p);
         }
 
@@ -175,10 +224,7 @@ namespace Kaenen
         {
             double maks = 0.0;
             for (int i = 0; i < Math.Min(a.Length, b.Length); i++)
-            {
-                double rozn = Math.Abs(a[i] - b[i]);
-                if (rozn > maks) maks = rozn;
-            }
+                maks = Math.Max(maks, Math.Abs(a[i] - b[i]));
             return maks;
         }
     }
