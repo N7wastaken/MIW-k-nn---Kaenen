@@ -39,6 +39,30 @@ namespace Kaenen
             cmbMetryki.DisplayMember = "Name";
         }
 
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_SYSCOMMAND = 0x0112;
+            const int SC_MOUSEMENU = 0xF090; // Kliknięcie ikony okna
+            const int SC_CLOSE = 0xF060; // Zamknięcie okna (podwójne kliknięcie na ikonie)
+
+            if (m.Msg == WM_SYSCOMMAND)
+            {
+                int command = m.WParam.ToInt32() & 0xFFF0;
+
+                if (command == SC_MOUSEMENU)
+                {
+                    return; // Blokuje tylko menu systemowe na ikonie
+                }
+
+                if (command == SC_CLOSE && Control.MousePosition.X < this.Left + 40)
+                {
+                    return; // Blokuje podwójne kliknięcie na ikonie, ale nie blokuje normalnego "X"
+                }
+            }
+
+            base.WndProc(ref m);
+        }
+
         private void BtnWczytaj_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dlg = new OpenFileDialog())
@@ -102,7 +126,7 @@ namespace Kaenen
         private void NormalizujDane()
         {
             int liczbaCech = dane[0].Length;
-            
+
             for (int i = 0; i < liczbaCech; i++)
             {
                 double min = dane.Min(x => x[i]);
@@ -131,8 +155,8 @@ namespace Kaenen
                 return;
             }
 
-            if (!daneZnormalizowane && MessageBox.Show("Dane nie zostały znormalizowane. Czy chcesz kontynuować?", 
-                                                   "Ostrzeżenie", 
+            if (!daneZnormalizowane && MessageBox.Show("Dane nie zostały znormalizowane. Czy chcesz kontynuować?",
+                                                   "Ostrzeżenie",
                                                    MessageBoxButtons.YesNo) == DialogResult.No)
             {
                 return;
@@ -154,10 +178,10 @@ namespace Kaenen
             {
                 string przewidzianaKlasa = KlasyfikujKNn(dane[i], wybranaMetoda, i);
                 bool poprawna = przewidzianaKlasa == etykiety[i];
-                
+
                 if (poprawna) poprawneKlasyfikacje++;
-                
-                sb.AppendLine($"Próbka {i+1,3}: {(poprawna ? "OK" : "NG")} | " +                  // NG - Not Good  
+
+                sb.AppendLine($"Próbka {i + 1,3}: {(poprawna ? "OK" : "NG")} | " +                  // NG - Not Good  
                               $"Rzeczywista: {etykiety[i],-9} Przewidziana: {przewidzianaKlasa}");
             }
 
@@ -189,8 +213,8 @@ namespace Kaenen
                 .OrderByDescending(g => g.Count())
                 .ToList();
 
-            return kNajblizszych.Count == 1 || kNajblizszych[0].Count() > kNajblizszych[1].Count() 
-                   ? kNajblizszych[0].Key 
+            return kNajblizszych.Count == 1 || kNajblizszych[0].Count() > kNajblizszych[1].Count()
+                   ? kNajblizszych[0].Key
                    : "REMIS";
         }
 
